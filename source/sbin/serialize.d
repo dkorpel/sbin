@@ -98,7 +98,13 @@ void sbinSerialize(RH=EmptyReprHandler, R, string file=__FILE__, size_t line=__L
             import std.traits : hasUDA;
             foreach (i, ref v; val.tupleof)
                 static if (!hasUDA!(T.tupleof[i], sbinSkip))
-                    impl(r, v);
+                {
+                    static if (hasUDA!(T.tupleof[i], sbinSizeT))
+                        impl(r, cast(ulong) v);
+                    else
+                        impl(r, v);
+                }
+
         }
         else static if (is(T == union))
         {

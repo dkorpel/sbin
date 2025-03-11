@@ -115,7 +115,7 @@ version (unittest) import std.algorithm : equal;
         Color color;
         @sbinSkip int local = 42;
     }
-    
+
     const foo1 = Foo(10, 3.14, 2.17, 8, "s1", Color.red);
 
     //                  a              b         c       d
@@ -130,7 +130,7 @@ version (unittest) import std.algorithm : equal;
     assert (foo1Data.length == foo1Size);
     assert (foo1Data == [10, 0, 0, 0, 0, 0, 0, 0, 195, 245, 72, 64, 72, 225, 10, 64, 8, 0, 2, 115, 49, 1]);
     assert (foo1Data.sbinDeserialize!Foo == foo1);
-    
+
     const foo2 = Foo(2, 2.22, 2.22, 2, "str2", Color.green);
 
     const foo2Size = ulong.sizeof + float.sizeof * 2 + ushort.sizeof +
@@ -151,12 +151,12 @@ version (unittest) import std.algorithm : equal;
     }
 
     auto bar = Bar(123, 3.14, Level.high, [ foo1, foo2 ]);
-    
+
     //                   a               b          level
     const barSize = ulong.sizeof + float.sizeof + ubyte.sizeof +
     //                                 foos
                     (1 + foo1Size + foo2Size);
-    
+
     const barData = bar.sbinSerialize;
     assert (barData.length == barSize);
     assert (barData == [123, 0, 0, 0, 0, 0, 0, 0, 195, 245, 72, 64, 2, 2, 10, 0,
@@ -575,7 +575,7 @@ unittest
     auto arr = cast(ubyte[])[1,2,3,4,5,6];
     const foo = Foo(arr, arr[0..2]);
     assert (foo.a.ptr == foo.b.ptr);
-    
+
     immutable ubyte[] stable_format = [6, 1, 2, 3, 4, 5, 6, 2, 1, 2];
     assert (foo.sbinSerialize == stable_format);
     const foo2 = stable_format.sbinDeserialize!Foo;
@@ -846,6 +846,9 @@ unittest
     assert (value == sbinDeserialize!(typeof(value))(rng));
 }
 
+// BitArray uses size_t elements for its internal array, making this test
+// different on 32-bit builds. Only run it on 64-bit
+static if (size_t.sizeof == 8)
 unittest
 {
     import std.bitmanip;
@@ -1118,4 +1121,16 @@ static if (__VERSION__ >= 2097)
 
         assert (val1 == val2);
     }
+}
+
+unittest
+{
+    static struct S
+    {
+        @sbinSizeT size_t x = 0xAA, y = 0xBB;
+    }
+
+    S s;
+    import std.stdio;
+    assert(sbinSerialize(s) == [0xAA, 0, 0, 0, 0, 0, 0, 0, 0xBB, 0, 0, 0, 0, 0, 0, 0]);
 }

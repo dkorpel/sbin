@@ -161,7 +161,7 @@ least until the major version number is bumped. It is therefore safe to allow
 dub to do minor version upgrades with a version specification like `~>0.8`,
 equivalent to ">=0.8.0 <1.0.0".
 
-If, in the future, changes to the format are made, then sbin will provide a 
+If, in the future, changes to the format are made, then sbin will provide a
 variant of `sbinDeserialize` that supports the older format(s). This will be
 mentioned in the release notes.
 
@@ -177,6 +177,13 @@ version with which the succeeding bytes should be deserialized.
 If a field in a struct has the `@sbinSkip` attribute, the field will
 not be serialized. Upon deserialization the field will have the value of
 the static initializer if there is one, or `.init` otherwise.
+
+### size_t fields
+
+Unfortunately `size_t` is an alias and not its own type, so it can't be detected with introspection:
+It just gets substituted for `uint` / `ulong` depending on the target architecture.
+To make a struct with `size_t` fields binary compatible between 32-bit and 64-bit builds, add the `@sbinSizeT` attribute.
+This will serialize the field as `ulong`, even on 32-bit.
 
 ### Variable length integers
 
@@ -201,11 +208,11 @@ See
 * [`mir.algebraic` example](example/mir_algebraic_example.d)
 * [`sumtype` example](example/sumtype_example.d)
 
-Phobos 2.097 include `std.sumtype`, it supports too. 
+Phobos 2.097 include `std.sumtype`, it supports too.
 
 ### Types that can't be changed
 
-For example `std.bitmanip.BitArray` has pointer, `std.datetime.SysTime` has 
+For example `std.bitmanip.BitArray` has pointer, `std.datetime.SysTime` has
 class field `TimeZone`. They can't be serialized automaticaly.
 For solving this problem you can use representation handlers.
 

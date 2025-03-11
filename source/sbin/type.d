@@ -11,6 +11,11 @@ import sbin.repr;
 /// UDA for marking struct fields to be skipped.
 enum sbinSkip;
 
+/// UDA for marking a `size_t` field to be serialized/deserialized as ulong.
+/// This is needed to allow exported files from a 32-bit app to be imported
+/// in a 64-bit app and vice versa.
+enum sbinSizeT;
+
 /// variable length uint
 struct vluint
 {
@@ -280,7 +285,7 @@ template hasCustomRepr(T, RH=EmptyReprHandler)
 
         alias Repr = ReturnType!(() => T.init.sbinCustomRepr);
 
-        enum hasCustomRepr = is(typeof(sbinSerialize!RH(Repr.init))) && 
+        enum hasCustomRepr = is(typeof(sbinSerialize!RH(Repr.init))) &&
                 is(typeof(((){ return T.sbinFromCustomRepr(Repr.init); })()) == Unqual!T);
     }
     else enum hasCustomRepr = false;

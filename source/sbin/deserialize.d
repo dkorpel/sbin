@@ -237,7 +237,16 @@ void sbinDeserializePart(RH=EmptyReprHandler, R, string file=__FILE__, size_t li
             import std.traits : hasUDA;
             foreach (i, ref v; trg.tupleof)
                 static if (!hasUDA!(T.tupleof[i], sbinSkip))
-                    impl(r, v, __traits(identifier, trg.tupleof[i]));
+                {
+                    static if (hasUDA!(T.tupleof[i], sbinSizeT))
+                    {
+                        ulong v2;
+                        impl(r, v2, __traits(identifier, trg.tupleof[i]));
+                        v = cast(typeof(v)) v2;
+                    }
+                    else
+                        impl(r, v, __traits(identifier, trg.tupleof[i]));
+                }
         }
         else static if (is(T == union))
         {
