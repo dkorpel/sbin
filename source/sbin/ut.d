@@ -1131,6 +1131,7 @@ unittest
     }
 
     S s;
-    import std.stdio;
-    assert(sbinSerialize(s) == [0xAA, 0, 0, 0, 0, 0, 0, 0, 0xBB, 0, 0, 0, 0, 0, 0, 0]);
+    ubyte[] bytes = [0xAA, 0, 0, 0, 0, 0, 0, 0, 0xBB, 0, 0, 0, 0, 0, 0, 0];
+    assert(sbinSerialize(s) == bytes);
+    assert(sbinDeserialize!S(bytes) == s);
 }
